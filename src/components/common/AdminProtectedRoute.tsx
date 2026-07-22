@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { getCurrentUserSync } from '@/services/auth';
-import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/contexts/AuthContext';
+import { MfaGuard } from '@/components/auth/MfaGuard';
 
 interface Props {
   children: React.ReactNode;
@@ -9,48 +8,19 @@ interface Props {
 
 /**
  * Guard para rutas administrativas.
- * Verifica que exista sesión activa en Supabase y perfil en internal_users.
- * Si no hay sesión, redirige a /admin/login.
+ *
+ * Requiere, en orden:
+ *   1. Sesión activa en Supabase (login con Google).
+ *   2. Perfil en `internal_users` existente y activo.
+ *   3. Segundo factor verificado (sesión en AAL2) — vía MfaGuard.
+ *
+ * Sin sesión → /admin/login. Cuenta inactiva/no provisionada → /admin/login?inactivo=1.
  */
 export default function AdminProtectedRoute({ children }: Props) {
+  const { user, profile, isActive, loading } = useAuth();
   const location = useLocation();
-  const [status, setStatus] = useState<'checking' | 'ok' | 'denied'>('checking');
 
-  useEffect(() => {
-    let cancelled = false;
-
-    async function verify() {
-      // 1. Verificación rápida por localStorage
-      const cached = getCurrentUserSync();
-      if (!cached) {
-        if (!cancelled) setStatus('denied');
-        return;
-      }
-
-      // 2. Verificación real de sesión Supabase
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        if (!cancelled) setStatus('denied');
-        return;
-      }
-
-      // 3. Confirmar que el perfil sigue activo en BD
-      const { data: profile } = await supabase
-        .from('internal_users')
-        .select('is_active, role')
-        .eq('id', session.user.id)
-        .maybeSingle();
-
-      if (!cancelled) {
-        setStatus(profile?.is_active ? 'ok' : 'denied');
-      }
-    }
-
-    verify();
-    return () => { cancelled = true; };
-  }, [location.pathname]);
-
-  if (status === 'checking') {
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -61,9 +31,14 @@ export default function AdminProtectedRoute({ children }: Props) {
     );
   }
 
-  if (status === 'denied') {
+  if (!user) {
     return <Navigate to="/admin/login" state={{ from: location }} replace />;
   }
 
-  return <>{children}</>;
+  // Perfil inexistente (no provisionado) o inactivo → pendiente de activación.
+  if (!profile || !isActive) {
+    return <Navigate to="/admin/login?inactivo=1" state={{ from: location }} replace />;
+  }
+
+  return <MfaGuard>{children}</MfaGuard>;
 }

@@ -7,7 +7,7 @@ const ConsultApplicationPage = lazy(() => import('./pages/ConsultApplicationPage
 const ApplicationViewPage = lazy(() => import('./pages/ApplicationViewPage'));
 const RecoverDraftPage = lazy(() => import('./pages/RecoverDraftPage'));
 const AdminLoginPage = lazy(() => import('./pages/admin/AdminLoginPage'));
-const AdminRegisterPage = lazy(() => import('./pages/admin/AdminRegisterPage'));
+const AuthCallbackPage = lazy(() => import('./pages/AuthCallbackPage'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const AdminApplicationsPage = lazy(() => import('./pages/admin/AdminApplicationsPage'));
 const AdminApplicationDetailPage = lazy(() => import('./pages/admin/AdminApplicationDetailPage'));
@@ -36,8 +36,8 @@ export const routes: RouteConfig[] = [
   { name: 'Recuperar Borrador',   path: '/solicitud/recuperar-borrador', element: <RecoverDraftPage />,      public: true },
 
   // ── Autenticación admin (públicas) ──────────────────────────────────────────
-  { name: 'Login Administrativo', path: '/admin/login',     element: <AdminLoginPage />,    public: true },
-  { name: 'Registro Interno',     path: '/admin/registro',  element: <AdminRegisterPage />, public: true },
+  { name: 'Login Administrativo', path: '/admin/login',     element: <AdminLoginPage />,     public: true },
+  { name: 'Callback OAuth',       path: '/auth/callback',   element: <AuthCallbackPage />,   public: true },
 
   // ── Rutas protegidas (requieren sesión) ─────────────────────────────────────
   { name: 'Panel',                path: '/admin/dashboard',              element: <AdminDashboard /> },

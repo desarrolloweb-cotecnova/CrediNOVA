@@ -1,67 +1,70 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Loader2, LogIn } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { login, setCurrentUser } from '@/services/auth';
+import { useAuth } from '@/contexts/AuthContext';
+import { LOGO_URL } from '@/lib/assets';
 
-const loginSchema = z.object({
-  email: z.string().email('Email inválido'),
-  password: z.string().min(1, 'Contraseña requerida'),
-});
-
-type LoginFormData = z.infer<typeof loginSchema>;
+/** Logo de Google (multicolor) para el botón de inicio de sesión. */
+function GoogleGlyph() {
+  return (
+    <svg viewBox="0 0 24 24" className="mr-2 h-4 w-4" aria-hidden>
+      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
+      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23z" />
+      <path fill="#FBBC05" d="M5.84 14.1a6.6 6.6 0 0 1 0-4.2V7.06H2.18a11 11 0 0 0 0 9.88l3.66-2.84z" />
+      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84C6.71 7.31 9.14 5.38 12 5.38z" />
+    </svg>
+  );
+}
 
 export default function AdminLoginPage() {
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const { signInWithGoogle, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
+  const [searchParams] = useSearchParams();
 
-  const form = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: { email: '', password: '' },
-  });
-
-  const onSubmit = async (data: LoginFormData) => {
-    setIsLoading(true);
-    try {
-      const result = await login(data);
-      if (result.success && result.user) {
-        setCurrentUser(result.user);
-        toast.success('Sesión iniciada correctamente');
-        navigate('/admin/dashboard');
-      } else {
-        toast.error(result.error || 'Credenciales inválidas');
-      }
-    } catch {
-      toast.error('Error al iniciar sesión');
-    } finally {
-      setIsLoading(false);
+  // Avisos por parámetros de URL (cuenta inactiva o dominio no permitido).
+  useEffect(() => {
+    if (searchParams.get('inactivo') === '1') {
+      toast.warning('Tu cuenta aún no ha sido activada. Contacta al administrador.');
     }
+    if (searchParams.get('error') === 'domain') {
+      toast.error('Solo se permite el acceso con cuentas @cotecnova.edu.co.');
+    }
+  }, [searchParams]);
+
+  // Si ya hay sesión, ir al panel (el flujo de MFA se resuelve en /auth/callback
+  // y en el guard de rutas protegidas).
+  useEffect(() => {
+    if (user && !authLoading) {
+      navigate('/admin/dashboard', { replace: true });
+    }
+  }, [user, authLoading, navigate]);
+
+  const handleGoogleSignIn = async () => {
+    setGoogleLoading(true);
+    const { error } = await signInWithGoogle();
+    if (error) {
+      toast.error('No se pudo iniciar sesión con Google. Intenta de nuevo.');
+      setGoogleLoading(false);
+    }
+    // Si no hay error, Supabase redirige automáticamente a Google.
   };
 
   return (
     <div className="min-h-screen bg-muted/30 flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
-
         {/* Logo + título */}
         <div className="text-center mb-8 space-y-3">
-          <img
-            src="/images/brand/credinova-logo.svg"
-            alt="CrediNOVA"
-            className="h-16 w-auto mx-auto"
-          />
+          <img src={LOGO_URL} alt="CrediNOVA" className="h-16 w-auto mx-auto" />
           <div>
             <h1 className="text-xl font-semibold tracking-tight text-balance">
               Acceso Administrativo
             </h1>
             <p className="text-sm text-muted-foreground mt-1 text-pretty">
-              Ingrese sus credenciales para continuar
+              Ingrese con su cuenta institucional para continuar
             </p>
           </div>
         </div>
@@ -70,55 +73,24 @@ export default function AdminLoginPage() {
           <CardHeader className="pb-4">
             <CardTitle className="text-base font-medium text-balance">Iniciar sesión</CardTitle>
             <CardDescription className="text-pretty">
-              Solo para usuarios registrados por el administrador
+              Acceso exclusivo para el personal de COTECNOVA
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-normal">Correo electrónico</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="email"
-                          placeholder="usuario@cotecnova.edu.co"
-                          autoComplete="email"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-normal">Contraseña</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="password"
-                          placeholder="••••••••"
-                          autoComplete="current-password"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button type="submit" className="w-full mt-2" disabled={isLoading}>
-                  {isLoading
-                    ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Iniciando sesión…</>
-                    : <><LogIn className="mr-2 h-4 w-4" />Iniciar sesión</>}
-                </Button>
-              </form>
-            </Form>
+          <CardContent className="flex flex-col gap-4">
+            <Button
+              type="button"
+              className="w-full"
+              onClick={handleGoogleSignIn}
+              disabled={googleLoading || authLoading}
+            >
+              {googleLoading
+                ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Redirigiendo a Google…</>
+                : <><GoogleGlyph />Iniciar sesión con Google</>}
+            </Button>
+            <p className="text-center text-xs text-muted-foreground text-pretty">
+              El acceso está restringido a correos @cotecnova.edu.co y requiere
+              verificación en dos pasos (Google Authenticator).
+            </p>
           </CardContent>
         </Card>
 
