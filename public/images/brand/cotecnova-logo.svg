@@ -1,0 +1,7 @@
+<svg width="360" height="80" viewBox="0 0 360 80" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="COTECNOVA">
+  <rect x="8" y="16" width="48" height="48" rx="10" fill="#006134"/>
+  <text x="20" y="49" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="26" font-weight="800" fill="#ffffff">C</text>
+  <text x="70" y="50" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="30" font-weight="700" letter-spacing="1">
+    <tspan fill="#006134">COTEC</tspan><tspan fill="#F06C14">NOVA</tspan>
+  </text>
+</svg>

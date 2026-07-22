@@ -1,0 +1,15 @@
+<svg width="320" height="80" viewBox="0 0 320 80" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="CrediNOVA">
+  <!-- Ícono: birrete (educación) sobre cuadro redondeado verde -->
+  <rect x="8" y="8" width="64" height="64" rx="16" fill="#006134"/>
+  <!-- base del birrete -->
+  <path d="M28 40 h24 v8 a12 8 0 0 1 -24 0 z" fill="#004a27"/>
+  <!-- mortarboard -->
+  <path d="M40 22 L62 33 L40 44 L18 33 Z" fill="#ffffff"/>
+  <!-- borla -->
+  <path d="M40 33 L58 33 L58 52" stroke="#F06C14" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <circle cx="58" cy="54" r="3" fill="#F06C14"/>
+  <!-- Wordmark -->
+  <text x="86" y="52" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="34" font-weight="700">
+    <tspan fill="#006134">Credi</tspan><tspan fill="#F06C14">NOVA</tspan>
+  </text>
+</svg>

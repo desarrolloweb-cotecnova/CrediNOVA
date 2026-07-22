@@ -217,7 +217,7 @@ function AdminLayoutInner({ children }: AdminLayoutProps) {
       <aside className="hidden lg:flex flex-col fixed left-0 top-0 h-screen w-64 border-r border-border bg-background z-40 overflow-y-auto">
         <div className="p-6 border-b border-border shrink-0">
           <img
-            src="https://miaoda-conversation-file.s3cdn.medo.dev/user-8u8uo5llzbwg/20260509/file-bia1hxjy835s.png"
+            src="/images/brand/credinova-logo.svg"
             alt="CrediNOVA Logo"
             className="h-12 w-auto"
           />
@@ -249,7 +249,7 @@ function AdminLayoutInner({ children }: AdminLayoutProps) {
       <header className="lg:hidden fixed top-0 left-0 right-0 h-14 border-b border-border bg-background z-40 flex items-center px-4 gap-3">
         {/* Logo */}
         <img
-          src="https://miaoda-conversation-file.s3cdn.medo.dev/user-8u8uo5llzbwg/20260509/file-bia1hxjy835s.png"
+          src="/images/brand/credinova-logo.svg"
           alt="CrediNOVA Logo"
           className="h-8 w-auto shrink-0"
         />
@@ -274,7 +274,7 @@ function AdminLayoutInner({ children }: AdminLayoutProps) {
             <SheetContent side="left" className="w-64 p-0">
               <div className="p-6 border-b border-border">
                 <img
-                  src="https://miaoda-conversation-file.s3cdn.medo.dev/user-8u8uo5llzbwg/20260509/file-bia1hxjy835s.png"
+                  src="/images/brand/credinova-logo.svg"
                   alt="CrediNOVA Logo"
                   className="h-12 w-auto"
                 />

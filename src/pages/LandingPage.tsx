@@ -63,7 +63,7 @@ export default function LandingPage() {
             {/* Logo */}
             <a href="#" className="flex items-center shrink-0">
               <img
-                src="https://miaoda-conversation-file.s3cdn.medo.dev/user-8u8uo5llzbwg/20260509/file-bia1hxjy835s.png"
+                src="/images/brand/credinova-logo.svg"
                 alt="CrediNOVA Logo"
                 className="h-10 md:h-14 w-auto"
               />
@@ -959,10 +959,9 @@ export default function LandingPage() {
         <div className="container mx-auto px-4 md:px-6 py-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <img
-              src="https://miaoda-edit-image.s3cdn.medo.dev/bia2hvw84flt/IMG-bitn54l08o3k.png"
+              src="/images/brand/credinova-icon-light.svg"
               alt="CrediNOVA Icono"
               className="h-14 w-auto"
-              data-editor-config="%7B%22defaultSrc%22%3A%22https%3A%2F%2Fmiaoda-edit-image.s3cdn.medo.dev%2Fbia2hvw84flt%2FIMG-bitn54l08o3k.png%22%7D"
             />
             <div className="text-center sm:text-right space-y-1">
               <p className="text-sm text-primary-foreground/80 font-medium">

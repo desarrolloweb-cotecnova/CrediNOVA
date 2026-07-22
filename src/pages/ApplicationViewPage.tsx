@@ -144,7 +144,7 @@ export default function ApplicationViewPage() {
         <header className="border-b border-border bg-background">
           <div className="container mx-auto px-4 md:px-6 py-4 md:py-6">
             <img 
-              src="https://miaoda-conversation-file.s3cdn.medo.dev/user-8u8uo5llzbwg/20260509/file-bia1hxjy835s.png" 
+              src="/images/brand/credinova-logo.svg" 
               alt="CrediNOVA Logo" 
               className="h-12 md:h-16 w-auto"
             />
@@ -176,7 +176,7 @@ export default function ApplicationViewPage() {
       <header className="border-b border-border bg-background">
         <div className="container mx-auto px-4 md:px-6 py-4 md:py-6">
           <img 
-            src="https://miaoda-conversation-file.s3cdn.medo.dev/user-8u8uo5llzbwg/20260509/file-bia1hxjy835s.png" 
+            src="/images/brand/credinova-logo.svg" 
             alt="CrediNOVA Logo" 
             className="h-12 md:h-16 w-auto"
           />

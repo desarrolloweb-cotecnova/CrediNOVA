@@ -2805,7 +2805,7 @@ function MatriculaDocument({ application, generatedAt }: MatriculaDocumentProps)
       {/* Encabezado: logo + datos institución */}
       <div className="flex items-center gap-6 border-b border-border pb-6">
         <img
-          src="https://miaoda-conversation-file.s3cdn.medo.dev/user-8u8uo5llzbwg/app-bia2hvw84flt/20260522/logocotecnova.png"
+          src="/images/brand/cotecnova-logo.svg"
           alt="Logo Cotecnova"
           className="h-20 w-auto object-contain shrink-0"
         />

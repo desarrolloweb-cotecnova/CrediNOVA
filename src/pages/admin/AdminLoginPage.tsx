@@ -52,7 +52,7 @@ export default function AdminLoginPage() {
         {/* Logo + título */}
         <div className="text-center mb-8 space-y-3">
           <img
-            src="https://miaoda-conversation-file.s3cdn.medo.dev/user-8u8uo5llzbwg/20260509/file-bia1hxjy835s.png"
+            src="/images/brand/credinova-logo.svg"
             alt="CrediNOVA"
             className="h-16 w-auto mx-auto"
           />

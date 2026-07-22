@@ -464,7 +464,7 @@ export default function AdminReportsPage() {
         <div className="print-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <img
-              src="https://miaoda-conversation-file.s3cdn.medo.dev/user-8u8uo5llzbwg/app-bia2hvw84flt/20260522/logocotecnova.png"
+              src="/images/brand/cotecnova-logo.svg"
               alt="Cotecnova"
               style={{ height: '40px', width: 'auto' }}
             />
