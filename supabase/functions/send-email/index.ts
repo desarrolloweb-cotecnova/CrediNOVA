@@ -345,7 +345,7 @@ function buildEmailBody(payload: EmailPayload): string {
               <table width="100%" cellpadding="0" cellspacing="0">
                 <tr>
                   <td>
-                    <img src="https://miaoda-conversation-file.s3cdn.medo.dev/user-8u8uo5llzbwg/20260509/file-bia1hxjy835s.png" alt="CrediNOVA" height="44" style="display: block;" />
+                    <span style="font-family: Arial, Helvetica, sans-serif; font-size: 22px; font-weight: 700; letter-spacing: 0.2px;"><span style="color: #006134;">Credi</span><span style="color: #F06C14;">NOVA</span></span>
                   </td>
                   <td align="right">
                     <span style="display: inline-block; background: ${config.badgeColor}; color: #ffffff; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px;">${config.badgeLabel}</span>

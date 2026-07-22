@@ -52,7 +52,7 @@ serve(async (req: Request) => {
     <tr><td align="center">
       <table width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#ffffff;border-radius:12px;overflow:hidden;">
         <tr><td style="padding:28px 32px 20px;border-bottom:1px solid #f1f5f9;">
-          <img src="https://miaoda-conversation-file.s3cdn.medo.dev/user-8u8uo5llzbwg/20260509/file-bia1hxjy835s.png" alt="CrediNOVA" height="40" style="display:block;" />
+          <span style="font-family: Arial, Helvetica, sans-serif; font-size: 20px; font-weight: 700; letter-spacing: 0.2px;"><span style="color:#006134;">Credi</span><span style="color:#F06C14;">NOVA</span></span>
         </td></tr>
         <tr><td style="padding:28px 32px;">
           <p style="margin:0 0 12px;color:#374151;">Este es un <strong>correo de prueba</strong> del sistema CrediNOVA.</p>
