@@ -1,0 +1,1 @@
+ALTER TABLE applications ADD COLUMN amortization_schedule jsonb;

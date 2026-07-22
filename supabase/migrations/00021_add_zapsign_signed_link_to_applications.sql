@@ -1,0 +1,1 @@
+ALTER TABLE applications ADD COLUMN zapsign_signed_link text;
