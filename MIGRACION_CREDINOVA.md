@@ -92,8 +92,9 @@ contenido de cada archivo de `supabase/migrations/` **en orden numérico**
   **Database → Extensions** y vuelve a ejecutar esa migración.
 
 Verifica al final que existan las tablas `internal_users`, `applications`,
-`application_documents`, `academic_programs`, `credit_study_costs`, `otps`,
+`academic_programs`, `credit_study_costs`, `otps`,
 `application_verifications` y el historial, y que **RLS** esté activo.
+(`application_documents` no debe existir: la migración 00014 la elimina.)
 
 ---
 
@@ -101,6 +102,10 @@ Verifica al final que existan las tablas `internal_users`, `applications`,
 
 La migración **00015** crea el bucket **`public-documents`** (público) con sus
 políticas. Verifica en **Storage** que exista. Si no, ejecútala manualmente.
+
+Sube además al bucket el PDF **`autorizaciones-credito-educativo.pdf`**
+(Sección F del formulario lo enlaza desde `public-documents`; descárgalo del
+proyecto anterior o usa el original que tenga la institución).
 
 > Los documentos que suben los solicitantes usan **Cloudinary** (preset sin firma
 > `credinova_unsigned`, cuenta `drqfuh66o`), que se reutiliza sin cambios.

@@ -265,12 +265,13 @@ WITH CHECK (
 DROP POLICY IF EXISTS "Cualquiera puede ver costos" ON credit_study_costs;
 DROP POLICY IF EXISTS "Usuarios internos pueden gestionar costos" ON credit_study_costs;
 
--- Política SELECT: Todos pueden ver costos activos
+-- Política SELECT: Todos pueden ver los costos
+-- (credit_study_costs no tiene columna is_active; el esquema final usa USING (true))
 CREATE POLICY "Cualquiera puede ver costos de estudio activos"
 ON credit_study_costs
 FOR SELECT
 TO anon, authenticated
-USING (is_active = true);
+USING (true);
 
 -- Política INSERT: Solo usuarios internos activos pueden crear costos
 CREATE POLICY "Usuarios internos activos pueden crear costos"
@@ -315,6 +316,9 @@ WITH CHECK (
 -- Eliminar políticas antiguas si existen
 DROP POLICY IF EXISTS "Usuarios internos pueden ver otros usuarios" ON internal_users;
 DROP POLICY IF EXISTS "Solo administradores pueden gestionar usuarios" ON internal_users;
+-- Nombres creados en 00002/reintentos: eliminarlos para que esta migración sea idempotente
+DROP POLICY IF EXISTS "Usuarios internos activos pueden ver otros usuarios" ON internal_users;
+DROP POLICY IF EXISTS "Solo administradores pueden actualizar usuarios" ON internal_users;
 
 -- Política SELECT: Solo usuarios internos activos pueden ver otros usuarios
 CREATE POLICY "Usuarios internos activos pueden ver otros usuarios"

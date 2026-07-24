@@ -4,12 +4,17 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ExternalLink } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 interface AuthorizationsSectionProps {
   form: UseFormReturn<any>;
 }
 
-const PDF_URL = 'https://bihcxwebgmxmwizkziyt.supabase.co/storage/v1/object/public/public-documents/autorizaciones-credito-educativo.pdf';
+// El PDF vive en el bucket `public-documents` del proyecto Supabase configurado
+// en VITE_SUPABASE_URL (hay que subirlo al migrar de proyecto; ver guía §4).
+const PDF_URL = supabase.storage
+  .from('public-documents')
+  .getPublicUrl('autorizaciones-credito-educativo.pdf').data.publicUrl;
 
 export default function AuthorizationsSection({ form }: AuthorizationsSectionProps) {
   return (
