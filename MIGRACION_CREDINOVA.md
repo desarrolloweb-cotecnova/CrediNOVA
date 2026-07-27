@@ -82,9 +82,13 @@ contenido de cada archivo de `supabase/migrations/` **en orden numérico**
 
 ### Notas del esquema
 
-- La migración **00004** siembra 3 usuarios internos heredados con contraseña
-  temporal. Con login por Google esos usuarios quedan inertes al **deshabilitar
-  el proveedor Email/Password** (paso 7). No es necesario borrarlos.
+- La migración **00004** sembraba 3 usuarios internos con contraseña temporal.
+  La migración **00034** los elimina: no eran inertes, sino que **rompían el
+  Auth**. Al insertarlos por SQL quedaron con `NULL` en las columnas de token de
+  `auth.users`, y GoTrue las lee como texto no nulo, así que devolvía HTTP 500
+  (`converting NULL to string is unsupported`) al iniciar sesión con Google o al
+  intentar borrarlos desde el panel. Nunca siembres usuarios en `auth.users` por
+  SQL sin poner `''` en esas columnas.
 - La migración **00033** ajusta el trigger para que los nuevos usuarios que entren
   por Google queden **inactivos** hasta que un admin/rector los active.
 - La migración **00029** usa la extensión **`pg_cron`** (keepalive cada 3 días para
@@ -202,10 +206,11 @@ En **Authentication** del panel de Supabase:
 ## 9. Crear el primer administrador (bootstrap)
 
 El trigger deja inactivos a los nuevos usuarios, salvo el **primer** usuario del
-sistema, que se crea como **admin activo**. Por eso:
+sistema (cuando `internal_users` está vacía) y el correo de arranque
+`desarrolloweb@cotecnova.edu.co`, que se crean como **admin activo**. Por eso:
 
 1. Con todo desplegado, entra a `/admin/login` y haz **"Iniciar sesión con Google"**
-   con la cuenta que será administradora (p. ej. `rector@cotecnova.edu.co`).
+   con la cuenta de arranque `desarrolloweb@cotecnova.edu.co`.
 2. Al ser el primer registro, quedará como **admin activo**. Se te pedirá
    **configurar el 2FA** (escanear el QR con Google Authenticator) y luego entrarás
    al panel.
