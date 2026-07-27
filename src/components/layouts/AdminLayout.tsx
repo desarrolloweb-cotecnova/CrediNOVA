@@ -17,6 +17,7 @@ import {
   Mail,
   Server,
   ChevronDown,
+  ShieldCheck,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -26,10 +27,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { getCurrentUserSync, logout } from '@/services/auth';
-import { supabase } from '@/lib/supabase';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { LOGO_URL } from '@/lib/assets';
 
@@ -69,9 +66,6 @@ function AdminLayoutInner({ children }: AdminLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
-  const [passwords, setPasswords] = useState({ current: '', new: '', confirm: '' });
-  const [isChangingPassword, setIsChangingPassword] = useState(false);
 
   const currentUser = getCurrentUserSync();
   const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'rector';
@@ -111,50 +105,6 @@ function AdminLayoutInner({ children }: AdminLayoutProps) {
     await logout();
     navigate('/admin/login');
     toast.success('Sesión cerrada correctamente');
-  };
-
-  const handleChangePassword = async () => {
-    if (!passwords.new || !passwords.confirm || !passwords.current) {
-      toast.error('Por favor complete todos los campos');
-      return;
-    }
-    if (passwords.new !== passwords.confirm) {
-      toast.error('Las contraseñas no coinciden');
-      return;
-    }
-    if (passwords.new.length < 8) {
-      toast.error('La contraseña debe tener al menos 8 caracteres');
-      return;
-    }
-
-    setIsChangingPassword(true);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user?.email) {
-        toast.error('No se pudo obtener el usuario actual');
-        return;
-      }
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: user.email,
-        password: passwords.current,
-      });
-      if (signInError) {
-        toast.error('La contraseña actual es incorrecta');
-        return;
-      }
-      const { error: updateError } = await supabase.auth.updateUser({ password: passwords.new });
-      if (updateError) {
-        toast.error(updateError.message || 'Error al cambiar la contraseña');
-        return;
-      }
-      toast.success('Contraseña cambiada correctamente');
-      setChangePasswordOpen(false);
-      setPasswords({ current: '', new: '', confirm: '' });
-    } catch {
-      toast.error('Error inesperado al cambiar la contraseña');
-    } finally {
-      setIsChangingPassword(false);
-    }
   };
 
   const NavLinks = () => (
@@ -240,7 +190,8 @@ function AdminLayoutInner({ children }: AdminLayoutProps) {
         <div className="shrink-0">
           <ProfileDropdown
             currentUser={currentUser}
-            onOpenProfile={() => setChangePasswordOpen(true)}
+            onOpenProfile={() => navigate('/admin/perfil')}
+            onOpenSecurity={() => navigate('/admin/seguridad')}
             onLogout={handleLogout}
           />
         </div>
@@ -262,7 +213,8 @@ function AdminLayoutInner({ children }: AdminLayoutProps) {
         <div className="flex items-center gap-1 shrink-0">
           <ProfileDropdown
             currentUser={currentUser}
-            onOpenProfile={() => setChangePasswordOpen(true)}
+            onOpenProfile={() => navigate('/admin/perfil')}
+            onOpenSecurity={() => navigate('/admin/seguridad')}
             onLogout={handleLogout}
             compact
           />
@@ -295,54 +247,6 @@ function AdminLayoutInner({ children }: AdminLayoutProps) {
         </main>
       </div>
 
-      {/* ── Diálogo Cambiar Contraseña ─────────────────────────── */}
-      <Dialog open={changePasswordOpen} onOpenChange={setChangePasswordOpen}>
-        <DialogContent className="max-w-[calc(100%-2rem)] md:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Cambiar Contraseña</DialogTitle>
-            <DialogDescription>
-              Ingrese su contraseña actual y la nueva contraseña
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="currentPassword">Contraseña Actual</Label>
-              <Input
-                id="currentPassword"
-                type="password"
-                value={passwords.current}
-                onChange={(e) => setPasswords({ ...passwords, current: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="newPassword">Nueva Contraseña</Label>
-              <Input
-                id="newPassword"
-                type="password"
-                value={passwords.new}
-                onChange={(e) => setPasswords({ ...passwords, new: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirmar Nueva Contraseña</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                value={passwords.confirm}
-                onChange={(e) => setPasswords({ ...passwords, confirm: e.target.value })}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setChangePasswordOpen(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleChangePassword} disabled={isChangingPassword}>
-              {isChangingPassword ? 'Cambiando...' : 'Cambiar Contraseña'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
@@ -353,11 +257,12 @@ function AdminLayoutInner({ children }: AdminLayoutProps) {
 interface ProfileDropdownProps {
   currentUser: ReturnType<typeof getCurrentUserSync>;
   onOpenProfile: () => void;
+  onOpenSecurity: () => void;
   onLogout: () => void;
   compact?: boolean;
 }
 
-function ProfileDropdown({ currentUser, onOpenProfile, onLogout, compact = false }: ProfileDropdownProps) {
+function ProfileDropdown({ currentUser, onOpenProfile, onOpenSecurity, onLogout, compact = false }: ProfileDropdownProps) {
   const name = currentUser?.fullName || 'Usuario';
   const email = currentUser?.email || '';
   const role = currentUser?.role || '';
@@ -402,6 +307,10 @@ function ProfileDropdown({ currentUser, onOpenProfile, onLogout, compact = false
           <DropdownMenuItem onClick={onOpenProfile} className="gap-2 px-4 py-2.5">
             <User className="h-4 w-4 text-muted-foreground" />
             <span>Mi Perfil</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={onOpenSecurity} className="gap-2 px-4 py-2.5">
+            <ShieldCheck className="h-4 w-4 text-muted-foreground" />
+            <span>Verificación en dos pasos</span>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem

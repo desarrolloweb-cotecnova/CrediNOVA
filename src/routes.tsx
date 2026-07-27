@@ -17,6 +17,8 @@ const AcademicProgramsPage = lazy(() => import('./pages/admin/AcademicProgramsPa
 const UsersManagementPage = lazy(() => import('./pages/admin/UsersManagementPage'));
 const EmailSettingsPage = lazy(() => import('./pages/admin/EmailSettingsPage'));
 const MonitoreoSupabasePage = lazy(() => import('./pages/admin/MonitoreoSupabasePage'));
+const ProfilePage = lazy(() => import('./pages/admin/ProfilePage'));
+const SecurityPage = lazy(() => import('./pages/admin/SecurityPage'));
 
 export interface RouteConfig {
   name: string;
@@ -49,4 +51,6 @@ export const routes: RouteConfig[] = [
   { name: 'Gestión de Usuarios',  path: '/admin/usuarios',               element: <UsersManagementPage /> },
   { name: 'Configuración Correo', path: '/admin/configuracion-correo',   element: <EmailSettingsPage /> },
   { name: 'Monitoreo Supabase',   path: '/admin/monitoreo-supabase',     element: <MonitoreoSupabasePage /> },
+  { name: 'Mi Perfil',            path: '/admin/perfil',                 element: <ProfilePage /> },
+  { name: 'Verificación 2 Pasos', path: '/admin/seguridad',              element: <SecurityPage /> },
 ];

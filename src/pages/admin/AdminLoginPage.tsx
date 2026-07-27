@@ -13,11 +13,9 @@ export default function AdminLoginPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  // Avisos por parámetros de URL (cuenta inactiva o dominio no permitido).
+  // Aviso por dominio no permitido. Las cuentas pendientes de aprobación ya no
+  // se expulsan aquí: conservan la sesión y ven CuentaPendientePage.
   useEffect(() => {
-    if (searchParams.get('inactivo') === '1') {
-      toast.warning('Tu cuenta aún no ha sido activada. Contacta al administrador.');
-    }
     if (searchParams.get('error') === 'domain') {
       toast.error('Solo se permite el acceso con cuentas @cotecnova.edu.co.');
     }
