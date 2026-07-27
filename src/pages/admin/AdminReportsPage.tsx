@@ -70,6 +70,7 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 import { formatDateShort, formatDateLong } from '@/lib/date';
+import { LOGO_URL } from '@/lib/assets';
 
 function formatDate(iso?: string | null): string {
   return formatDateShort(iso ?? null);
@@ -464,8 +465,8 @@ export default function AdminReportsPage() {
         <div className="print-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <img
-              src="/images/brand/cotecnova-logo.svg"
-              alt="Cotecnova"
+              src={LOGO_URL}
+              alt="CrediNOVA"
               style={{ height: '40px', width: 'auto' }}
             />
             <div>

@@ -36,6 +36,7 @@ import type { Application, AmortizationRow } from '@/types/application';
 import { EditableField } from '@/components/admin/EditableField';
 
 import { formatDateShort, formatDateTime, formatDateLong } from '@/lib/date';
+import { LOGO_URL } from '@/lib/assets';
 
 const STATUS_LABELS: Record<string, string> = {
   borrador: 'Borrador',
@@ -2805,8 +2806,8 @@ function MatriculaDocument({ application, generatedAt }: MatriculaDocumentProps)
       {/* Encabezado: logo + datos institución */}
       <div className="flex items-center gap-6 border-b border-border pb-6">
         <img
-          src="/images/brand/cotecnova-logo.svg"
-          alt="Logo Cotecnova"
+          src={LOGO_URL}
+          alt="CrediNOVA"
           className="h-20 w-auto object-contain shrink-0"
         />
         <div className="min-w-0">

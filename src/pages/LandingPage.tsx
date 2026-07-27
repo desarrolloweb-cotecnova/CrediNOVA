@@ -22,6 +22,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { getCreditStudyCosts } from '@/services/config';
+import { LOGO_URL, LOGO_ON_GREEN_URL } from '@/lib/assets';
 import StartApplicationDialog from '@/components/application/StartApplicationDialog';
 
 /** Anclas de navegación — coinciden con los id de cada sección */
@@ -63,8 +64,8 @@ export default function LandingPage() {
             {/* Logo */}
             <a href="#" className="flex items-center shrink-0">
               <img
-                src="/images/brand/credinova-logo.svg"
-                alt="CrediNOVA Logo"
+                src={LOGO_URL}
+                alt="CrediNOVA"
                 className="h-10 md:h-14 w-auto"
               />
             </a>
@@ -959,8 +960,8 @@ export default function LandingPage() {
         <div className="container mx-auto px-4 md:px-6 py-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <img
-              src="/images/brand/credinova-icon-light.svg"
-              alt="CrediNOVA Icono"
+              src={LOGO_ON_GREEN_URL}
+              alt="CrediNOVA"
               className="h-14 w-auto"
             />
             <div className="text-center sm:text-right space-y-1">

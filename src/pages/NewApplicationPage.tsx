@@ -18,6 +18,7 @@ import ApplicationConfirmationDialog from '@/components/application/ApplicationC
 import { createApplication, saveDraft, finalizeDraft, getDraftByCode } from '@/services/applications';
 import { notifyDraftSaved, notifyApplicationSubmitted } from '@/services/emailService';
 import type { Application, NewApplicationForm, EducationLevel, Occupation, ContractType, CreditPlan } from '@/types/application';
+import { LOGO_URL } from '@/lib/assets';
 
 // Schema de validación
 const applicationSchema = z.object({
@@ -601,8 +602,8 @@ export default function NewApplicationPage() {
         <div className="container mx-auto px-4 md:px-6 py-4 md:py-6">
           <div className="flex items-center gap-3">
             <img 
-              src="/images/brand/credinova-logo.svg" 
-              alt="CrediNOVA Logo" 
+              src={LOGO_URL} 
+              alt="CrediNOVA" 
               className="h-12 md:h-16 w-auto"
             />
           </div>

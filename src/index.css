@@ -6,7 +6,8 @@
 @tailwind utilities;
 
 /* CrediNOVA Design System - Minimal Template
-   Colores institucionales: Verde #00602F, Naranja #EE7117, Gris #525252
+   Colores institucionales tomados del logo oficial:
+   Verde #015D2C, Naranja #ED6E1C, Gris #525252
    Tipografía: Poppins (títulos), Source Sans 3 (cuerpo)
    Estilo: Sobrio, profesional, espacios amplios, sin sombras excesivas
 */
@@ -19,15 +20,15 @@
     --background: 0 0% 100%;
     --foreground: 0 0% 15%;
     
-    /* Verde institucional #00602F como primary */
-    --primary: 152 100% 19%;
+    /* Verde institucional #015D2C como primary (color exacto del logo) */
+    --primary: 148 98% 18.4%;
     --primary-foreground: 0 0% 100%;
-    
-    /* Naranja #EE7117 como secondary/accent */
-    --secondary: 24 88% 51%;
+
+    /* Naranja #ED6E1C como secondary/accent (color exacto del logo) */
+    --secondary: 24 85% 52%;
     --secondary-foreground: 0 0% 100%;
-    
-    --accent: 24 88% 51%;
+
+    --accent: 24 85% 52%;
     --accent-foreground: 0 0% 100%;
     
     /* Gris oscuro #525252 como muted */
@@ -43,7 +44,7 @@
     /* Bordes y inputs - minimal, sutiles */
     --border: 0 0% 90%;
     --input: 0 0% 90%;
-    --ring: 152 100% 19%;
+    --ring: 148 98% 18.4%;
     
     /* Estados */
     --destructive: 0 84% 60%;
@@ -53,8 +54,8 @@
     --info: 217 91% 60%;
     
     /* Charts - tonos institucionales */
-    --chart-1: 152 100% 19%;
-    --chart-2: 24 88% 51%;
+    --chart-1: 148 98% 18.4%;
+    --chart-2: 24 85% 52%;
     --chart-3: 0 0% 32%;
     --chart-4: 152 60% 35%;
     --chart-5: 24 70% 65%;
@@ -62,22 +63,22 @@
     /* Sidebar */
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 0 0% 15%;
-    --sidebar-primary: 152 100% 19%;
+    --sidebar-primary: 148 98% 18.4%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 0 0% 94%;
     --sidebar-accent-foreground: 0 0% 15%;
     --sidebar-border: 0 0% 90%;
-    --sidebar-ring: 152 100% 19%;
+    --sidebar-ring: 148 98% 18.4%;
   }
 
   .dark {
     --background: 0 0% 10%;
     --foreground: 0 0% 95%;
-    --primary: 152 100% 25%;
+    --primary: 148 98% 25%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 24 88% 55%;
+    --secondary: 24 85% 55%;
     --secondary-foreground: 0 0% 100%;
-    --accent: 24 88% 55%;
+    --accent: 24 85% 55%;
     --accent-foreground: 0 0% 100%;
     --muted: 0 0% 15%;
     --muted-foreground: 0 0% 65%;
@@ -87,25 +88,25 @@
     --popover-foreground: 0 0% 95%;
     --border: 0 0% 20%;
     --input: 0 0% 20%;
-    --ring: 152 100% 25%;
+    --ring: 148 98% 25%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
     --success: 142 71% 45%;
     --warning: 38 92% 50%;
     --info: 217 91% 60%;
-    --chart-1: 152 100% 25%;
-    --chart-2: 24 88% 55%;
+    --chart-1: 148 98% 25%;
+    --chart-2: 24 85% 55%;
     --chart-3: 0 0% 65%;
     --chart-4: 152 60% 40%;
     --chart-5: 24 70% 70%;
     --sidebar-background: 0 0% 12%;
     --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 152 100% 25%;
+    --sidebar-primary: 148 98% 25%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 0 0% 18%;
     --sidebar-accent-foreground: 0 0% 95%;
     --sidebar-border: 0 0% 20%;
-    --sidebar-ring: 152 100% 25%;
+    --sidebar-ring: 148 98% 25%;
   }
 }
 

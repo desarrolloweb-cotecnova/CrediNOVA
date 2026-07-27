@@ -260,8 +260,11 @@ Cuando tengas los Excel exportados desde Medo:
 - El archivo `.env` **nunca** se sube (está en `.gitignore`). En Vercel las
   variables viven en el panel.
 - La `service_role` key solo se usa en el servidor/CLI; jamás en el frontend.
-- Los logos actuales en `public/images/brand/` son **placeholders** (el logo
-  original estaba en el CDN de Medo, inaccesible). Reemplaza esos archivos por la
-  marca definitiva conservando el mismo nombre y no habrá que tocar código.
+- Los logos definitivos ya están en `public/images/brand/` (`credinova-logo.svg`
+  para fondos claros, `credinova-logo-verde.svg` para fondos verdes) y en
+  `public/favicon.svg`. Las rutas están centralizadas en `src/lib/assets.ts`:
+  reemplazar un archivo conservando su nombre actualiza toda la app sin tocar
+  código. Al cambiar el favicon, sube la versión en `package.json` para que los
+  navegadores no lo sirvan desde caché.
 - Recuerda migrar a futuro Cloudinary/ZapSign/Brevo a cuentas propias de COTECNOVA
   cuando se decida (hoy se reutilizan).

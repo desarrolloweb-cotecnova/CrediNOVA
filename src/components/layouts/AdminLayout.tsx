@@ -31,6 +31,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import { LOGO_URL } from '@/lib/assets';
 
 /** Mapeo de roles internos a etiquetas en español */
 const ROLE_LABELS: Record<string, string> = {
@@ -217,8 +218,8 @@ function AdminLayoutInner({ children }: AdminLayoutProps) {
       <aside className="hidden lg:flex flex-col fixed left-0 top-0 h-screen w-64 border-r border-border bg-background z-40 overflow-y-auto">
         <div className="p-6 border-b border-border shrink-0">
           <img
-            src="/images/brand/credinova-logo.svg"
-            alt="CrediNOVA Logo"
+            src={LOGO_URL}
+            alt="CrediNOVA"
             className="h-12 w-auto"
           />
         </div>
@@ -249,8 +250,8 @@ function AdminLayoutInner({ children }: AdminLayoutProps) {
       <header className="lg:hidden fixed top-0 left-0 right-0 h-14 border-b border-border bg-background z-40 flex items-center px-4 gap-3">
         {/* Logo */}
         <img
-          src="/images/brand/credinova-logo.svg"
-          alt="CrediNOVA Logo"
+          src={LOGO_URL}
+          alt="CrediNOVA"
           className="h-8 w-auto shrink-0"
         />
         {/* Título de página (móvil) */}
@@ -274,8 +275,8 @@ function AdminLayoutInner({ children }: AdminLayoutProps) {
             <SheetContent side="left" className="w-64 p-0">
               <div className="p-6 border-b border-border">
                 <img
-                  src="/images/brand/credinova-logo.svg"
-                  alt="CrediNOVA Logo"
+                  src={LOGO_URL}
+                  alt="CrediNOVA"
                   className="h-12 w-auto"
                 />
               </div>

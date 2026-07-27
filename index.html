@@ -2,8 +2,11 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="apple-touch-icon" href="/favicon.svg" />
+    <!-- El sufijo ?v= lo inyecta Vite con la versión de package.json: al publicar
+         una marca nueva basta con subir la versión para que los navegadores
+         dejen de servir el favicon viejo desde caché. -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=%APP_VERSION%" />
+    <link rel="apple-touch-icon" href="/favicon.svg?v=%APP_VERSION%" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CrediNOVA</title>
     <meta name="description" content="Gestión de solicitudes de crédito educativo de COTECNOVA" />
