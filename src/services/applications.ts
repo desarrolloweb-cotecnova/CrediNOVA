@@ -937,7 +937,8 @@ export async function saveAmortization(
 }
 
 /**
- * Actualiza uno o más campos de una solicitud (para edición del gestor en Secciones A y B).
+ * Actualiza uno o más campos de una solicitud (edición del gestor en las
+ * Secciones A, B, C, D y E del detalle de la solicitud).
  * Los campos se pasan con sus nombres de columna en snake_case tal como están en la BD.
  */
 export async function updateApplicationData(
