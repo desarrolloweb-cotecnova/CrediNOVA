@@ -37,7 +37,13 @@ serve(async (req: Request) => {
   const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
   const FROM_EMAIL = Deno.env.get('RESEND_FROM_EMAIL') || 'creditoycartera@cotecnova.edu.co';
     const FROM_ADDRESS = buildFrom(FROM_EMAIL);
-    console.log('[from] remitente efectivo:', FROM_ADDRESS);
+    // Nunca registrar el remitente completo: si el secret estuviera mal puesto
+    // (p. ej. con la clave API), acabaría en los logs. Solo se traza si es un
+    // correo bien formado y su dominio.
+    {
+      const m = /<?([^<>@\s]+)@([^<>@\s]+?)>?\s*$/.exec(FROM_ADDRESS);
+      console.log('[from] ¿remitente con formato de correo?:', Boolean(m), '| dominio:', m ? m[2] : '(sin @)');
+    }
 
   // Estado de las variables de entorno (sin exponer el valor real)
   const envStatus = {
