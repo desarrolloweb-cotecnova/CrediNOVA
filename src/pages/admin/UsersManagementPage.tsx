@@ -18,7 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import {
   Loader2, Plus, Pencil, Trash2, UserPlus, Users,
-  ShieldCheck, ShieldOff, Shield,
+  ShieldCheck, ShieldOff, Shield, KeyRound,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import AdminLayout from '@/components/layouts/AdminLayout';
@@ -28,6 +28,7 @@ import {
   createUser,
   updateUser,
   deleteUser,
+  resetUserMfa,
   type InternalUser,
   type CreateUserData,
   type UpdateUserData,
@@ -89,6 +90,7 @@ export default function UsersManagementPage() {
   const [showCreate, setShowCreate]     = useState(false);
   const [showEdit, setShowEdit]         = useState(false);
   const [showDelete, setShowDelete]     = useState(false);
+  const [showResetMfa, setShowResetMfa] = useState(false);
   const [selected, setSelected]         = useState<InternalUser | null>(null);
   const [isSaving, setIsSaving]         = useState(false);
 
@@ -180,6 +182,32 @@ export default function UsersManagementPage() {
     setShowDelete(false);
     setSelected(null);
     loadUsers();
+  }
+
+  // ── Restablecer verificación en dos pasos ─────────────────────────────────
+
+  function openResetMfa(user: InternalUser) {
+    setSelected(user);
+    setShowResetMfa(true);
+  }
+
+  async function handleResetMfa() {
+    if (!selected) return;
+    setIsSaving(true);
+    const { success, removedFactors, error } = await resetUserMfa(selected.id);
+    setIsSaving(false);
+    if (!success) {
+      toast.error(error?.message || 'No se pudo restablecer la verificación en dos pasos');
+      return;
+    }
+    toast.success(
+      removedFactors && removedFactors > 0
+        ? 'Verificación en dos pasos restablecida'
+        : 'El usuario no tenía verificación en dos pasos configurada',
+      { description: `${selected.full_name} deberá configurarla en su próximo inicio de sesión.` },
+    );
+    setShowResetMfa(false);
+    setSelected(null);
   }
 
   // ── Contadores ────────────────────────────────────────────────────────────
@@ -284,6 +312,15 @@ export default function UsersManagementPage() {
                               title="Editar usuario"
                             >
                               <Pencil className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+                              onClick={() => openResetMfa(user)}
+                              title="Restablecer verificación en dos pasos"
+                            >
+                              <KeyRound className="h-3.5 w-3.5" />
                             </Button>
                             <Button
                               variant="ghost"
@@ -543,6 +580,47 @@ export default function UsersManagementPage() {
               disabled={isSaving}
             >
               {isSaving ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Eliminando…</> : 'Eliminar usuario'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Diálogo: Restablecer verificación en dos pasos ──────────────────── */}
+      <Dialog open={showResetMfa} onOpenChange={(open) => { setShowResetMfa(open); if (!open) setSelected(null); }}>
+        <DialogContent className="max-w-[calc(100%-2rem)] md:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-balance">Restablecer verificación en dos pasos</DialogTitle>
+            <DialogDescription className="text-pretty">
+              Úsalo cuando el usuario haya perdido el teléfono o el acceso a Google
+              Authenticator.
+            </DialogDescription>
+          </DialogHeader>
+
+          {selected && (
+            <div className="py-2 space-y-3">
+              <div className="rounded-md border border-border p-4 space-y-1 bg-muted/30">
+                <p className="font-medium text-sm">{selected.full_name}</p>
+                <p className="text-xs text-muted-foreground">{selected.email}</p>
+                <Badge variant={getRoleVariant(selected.role)} className="mt-1">
+                  {getRoleLabel(selected.role)}
+                </Badge>
+              </div>
+              <p className="text-sm text-muted-foreground text-pretty">
+                Se eliminará su segundo factor y se cerrarán sus sesiones abiertas.
+                La próxima vez que inicie sesión deberá escanear un código QR nuevo.
+                Su cuenta, su rol y sus datos no se ven afectados.
+              </p>
+            </div>
+          )}
+
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowResetMfa(false)} disabled={isSaving}>
+              Cancelar
+            </Button>
+            <Button onClick={handleResetMfa} disabled={isSaving}>
+              {isSaving
+                ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Restableciendo…</>
+                : <><KeyRound className="h-4 w-4 mr-2" />Restablecer</>}
             </Button>
           </DialogFooter>
         </DialogContent>
