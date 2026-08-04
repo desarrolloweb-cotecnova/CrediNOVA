@@ -1,9 +1,17 @@
-import { createContext, useContext, useEffect, useState, useRef, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, useRef, useCallback, type ReactNode } from 'react';
 import { supabase } from '@/db/supabase';
 import type { User } from '@supabase/supabase-js';
 import type { InternalUser, UserRole } from '@/types/application';
 import { setCurrentUser } from '@/services/auth';
 import { toast } from 'sonner';
+import { useSessionExpiry } from '@/hooks/use-session-expiry';
+import {
+  LOGIN_PATH,
+  SESSION_EXPIRED_PARAM,
+  clearStoredStart,
+  getSessionExpiry,
+  isSessionExpired,
+} from '@/lib/session-policy';
 
 const ALLOWED_DOMAIN = '@cotecnova.edu.co';
 
@@ -62,6 +70,11 @@ interface AuthContextType {
   isAdmin: boolean;
   /** true si el perfil existe y está activo. */
   isActive: boolean;
+  /**
+   * Momento (epoch ms) en que caduca la sesión y habrá que volver a iniciarla;
+   * null si no hay sesión. Ver `SESSION_MAX_HOURS` en lib/session-policy.
+   */
+  sessionExpiresAt: number | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -70,10 +83,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<InternalUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [sessionExpiresAt, setSessionExpiresAt] = useState<number | null>(null);
 
   // Evita actualizaciones duplicadas cuando onAuthStateChange se dispara varias
   // veces para el mismo usuario (SIGNED_IN + TOKEN_REFRESHED, etc.).
   const currentUserIdRef = useRef<string | null>(null);
+
+  // Evita que la expulsión por caducidad se dispare dos veces (el temporizador
+  // y la comprobación al recuperar el foco pueden coincidir).
+  const expiringRef = useRef(false);
+
+  /**
+   * Cierra la sesión caducada y devuelve al usuario al login.
+   *
+   * Se recarga la página en lugar de navegar con el router: así no queda en
+   * memoria ningún dato del panel de la sesión anterior.
+   */
+  const expireSession = useCallback(async () => {
+    if (expiringRef.current) return;
+    expiringRef.current = true;
+
+    currentUserIdRef.current = null;
+    clearStoredStart();
+    syncCurrentUserCache(null);
+    await supabase.auth.signOut();
+
+    window.location.replace(`${LOGIN_PATH}?${SESSION_EXPIRED_PARAM}=1`);
+  }, []);
+
+  useSessionExpiry(user, expireSession);
 
   const refreshProfile = async () => {
     if (!user) {
@@ -92,6 +130,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       const sessionUser: User | null = session?.user ?? null;
       const newId = sessionUser?.id ?? null;
+
+      // Sesión que supera la ventana máxima (p. ej. una pestaña que quedó
+      // abierta desde ayer): se cierra antes de dar acceso a nada. Va antes del
+      // filtro de disparos duplicados para cubrir también los TOKEN_REFRESHED
+      // que llegan al despertar el equipo.
+      if (sessionUser && isSessionExpired(sessionUser)) {
+        void expireSession();
+        return;
+      }
 
       // Ignorar disparos duplicados para el mismo usuario.
       if (newId === currentUserIdRef.current) {
@@ -113,6 +160,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       setUser(sessionUser);
+      setSessionExpiresAt(sessionUser ? getSessionExpiry(sessionUser) : null);
 
       if (sessionUser) {
         getProfile(sessionUser.id).then(p => {
@@ -153,9 +201,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     currentUserIdRef.current = null;
+    clearStoredStart();
     await supabase.auth.signOut();
     setUser(null);
     setProfile(null);
+    setSessionExpiresAt(null);
     syncCurrentUserCache(null);
   };
 
@@ -166,7 +216,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider value={{
       user, profile, loading,
       signInWithGoogle, signOut, refreshProfile,
-      isAdmin, isActive,
+      isAdmin, isActive, sessionExpiresAt,
     }}>
       {children}
     </AuthContext.Provider>
