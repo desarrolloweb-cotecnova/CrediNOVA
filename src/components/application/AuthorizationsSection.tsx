@@ -9,7 +9,15 @@ interface AuthorizationsSectionProps {
   form: UseFormReturn<any>;
 }
 
-const PDF_URL = 'https://bihcxwebgmxmwizkziyt.supabase.co/storage/v1/object/public/public-documents/autorizaciones-credito-educativo.pdf';
+/**
+ * Documento de autorizaciones y declaraciones.
+ *
+ * Se sirve desde `public/` junto con la app (antes apuntaba al Storage del
+ * proyecto Supabase original, que ya no contiene el archivo y respondía 404
+ * `NoSuchKey`). Para actualizarlo, reemplaza el archivo en
+ * `public/documents/` conservando el mismo nombre.
+ */
+const PDF_URL = '/documents/autorizaciones-credito-educativo.pdf';
 
 export default function AuthorizationsSection({ form }: AuthorizationsSectionProps) {
   return (
@@ -38,11 +46,23 @@ export default function AuthorizationsSection({ form }: AuthorizationsSectionPro
         </CardHeader>
         <CardContent>
           <div className="w-full border border-border rounded-md overflow-hidden bg-muted/30">
-            <iframe
-              src={PDF_URL}
+            <object
+              data={PDF_URL}
+              type="application/pdf"
               className="w-full h-[600px] md:h-[700px]"
-              title="Autorizaciones y Declaraciones - Crédito Educativo"
-            />
+              aria-label="Autorizaciones y Declaraciones - Crédito Educativo"
+            >
+              {/* Respaldo para navegadores (sobre todo móviles) que no muestran PDF incrustado */}
+              <div className="flex flex-col items-center justify-center gap-3 p-8 text-center h-[600px] md:h-[700px]">
+                <p className="text-sm text-muted-foreground text-pretty">
+                  Su navegador no puede mostrar el documento aquí. Ábralo en una pestaña nueva para leerlo completo.
+                </p>
+                <Button type="button" size="sm" onClick={() => window.open(PDF_URL, '_blank')}>
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Abrir documento
+                </Button>
+              </div>
+            </object>
           </div>
           <p className="text-sm text-muted-foreground mt-4 text-pretty">
             Por favor, lea detenidamente todo el contenido del documento antes de aceptar las autorizaciones.
