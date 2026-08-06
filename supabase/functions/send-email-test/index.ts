@@ -6,6 +6,29 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
+/**
+ * Construye un `from` válido para Resend a partir del secret RESEND_FROM_EMAIL.
+ *
+ * Resend rechaza el envío (422 validation_error) si el campo no tiene la forma
+ * `correo@dominio` o `Nombre <correo@dominio>`. Dos casos lo rompían:
+ *
+ *  1. El secret ya venía como `Nombre <correo@dominio>`: al anteponerle otro
+ *     nombre quedaba `X <Nombre <correo@dominio>>`, que es inválido.
+ *  2. El nombre visible llevaba un guion largo «–» (U+2013). Un display name
+ *     sin comillas debe ser ASCII; si no, hay que entrecomillarlo.
+ *
+ * Aquí se respeta el valor si ya trae nombre, y si es solo un correo se le
+ * antepone un nombre entrecomillado y en ASCII.
+ */
+function buildFrom(raw: string | undefined): string {
+  const v = (raw ?? '').trim();
+  if (!v) return '"CrediNOVA - Cotecnova" <onboarding@resend.dev>';
+  // Ya viene como «Nombre <correo@dominio>»: usarlo tal cual.
+  if (/<[^<>@\s]+@[^<>@\s]+>\s*$/.test(v)) return v;
+  // Solo el correo: anteponer un nombre visible entrecomillado (ASCII).
+  return `"CrediNOVA - Cotecnova" <${v}>`;
+}
+
 serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -13,6 +36,14 @@ serve(async (req: Request) => {
 
   const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
   const FROM_EMAIL = Deno.env.get('RESEND_FROM_EMAIL') || 'creditoycartera@cotecnova.edu.co';
+    const FROM_ADDRESS = buildFrom(FROM_EMAIL);
+    // Nunca registrar el remitente completo: si el secret estuviera mal puesto
+    // (p. ej. con la clave API), acabaría en los logs. Solo se traza si es un
+    // correo bien formado y su dominio.
+    {
+      const m = /<?([^<>@\s]+)@([^<>@\s]+?)>?\s*$/.exec(FROM_ADDRESS);
+      console.log('[from] ¿remitente con formato de correo?:', Boolean(m), '| dominio:', m ? m[2] : '(sin @)');
+    }
 
   // Estado de las variables de entorno (sin exponer el valor real)
   const envStatus = {
@@ -81,7 +112,7 @@ serve(async (req: Request) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: `CrediNOVA – Cotecnova <${FROM_EMAIL}>`,
+        from: FROM_ADDRESS,
         to: [to],
         subject: '✅ Prueba de correo – CrediNOVA',
         html,

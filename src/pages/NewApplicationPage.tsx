@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -6,7 +6,7 @@ import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import { Card } from '@/components/ui/card';
-import { ArrowLeft, ArrowRight, Send, Save, Info, Copy } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Send, Save, Info, Copy, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import CosignerSection from '@/components/application/CosignerSection';
 import StudentSection from '@/components/application/StudentSection';
@@ -17,7 +17,27 @@ import AuthorizationsSection from '@/components/application/AuthorizationsSectio
 import ApplicationConfirmationDialog from '@/components/application/ApplicationConfirmationDialog';
 import { createApplication, saveDraft, finalizeDraft, getDraftByCode } from '@/services/applications';
 import { notifyDraftSaved, notifyApplicationSubmitted } from '@/services/emailService';
+import { getCreditStudyCostByYear } from '@/services/config';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
+  RECEIPT_REGEX,
+  parseDate,
+  today,
+  ageInYears,
+  getApplicationWarnings,
+  type ApplicationWarning,
+} from '@/lib/applicationValidation';
 import type { Application, NewApplicationForm, EducationLevel, Occupation, ContractType, CreditPlan } from '@/types/application';
+import { LOGO_URL } from '@/lib/assets';
 
 // Schema de validación
 const applicationSchema = z.object({
@@ -86,7 +106,8 @@ const applicationSchema = z.object({
   studentRelationshipToCosigner: z.string().min(1, 'Campo requerido'),
   
   // Pago estudio de crédito
-  creditStudyReceiptNumber: z.string().min(1, 'Campo requerido'),
+  creditStudyReceiptNumber: z.string().min(1, 'Campo requerido')
+    .regex(RECEIPT_REGEX, 'El número de recibo debe contener solo dígitos, sin letras, espacios ni barras'),
   creditStudyPaymentDate: z.string().min(1, 'Campo requerido'),
   creditStudyAmount: z.coerce.number().min(0, 'Monto inválido'),
   
@@ -98,7 +119,8 @@ const applicationSchema = z.object({
   paymentDayOfMonth: z.union([z.literal(1), z.literal(15)]),
   
   // Pago cuota inicial
-  initialPaymentReceiptNumber: z.string().min(1, 'Campo requerido'),
+  initialPaymentReceiptNumber: z.string().min(1, 'Campo requerido')
+    .regex(RECEIPT_REGEX, 'El número de recibo debe contener solo dígitos, sin letras, espacios ni barras'),
   initialPaymentDate: z.string().min(1, 'Campo requerido'),
   initialPaymentAmount: z.coerce.number().min(0, 'Valor inválido'),
   
@@ -106,6 +128,64 @@ const applicationSchema = z.object({
   studentAuthorizationAccepted: z.boolean().refine(val => val === true, 'Debe aceptar las autorizaciones'),
   cosignerAuthorizationAccepted: z.boolean().refine(val => val === true, 'Debe aceptar las autorizaciones'),
 }).superRefine((data, ctx) => {
+  const hoy = today();
+
+  // Ninguna fecha de pago puede estar en el futuro: no se puede haber pagado
+  // algo que todavía no ocurre.
+  for (const campo of ['creditStudyPaymentDate', 'initialPaymentDate'] as const) {
+    const d = parseDate(data[campo]);
+    if (d && d > hoy) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: [campo],
+        message: 'La fecha de pago no puede ser posterior a hoy',
+      });
+    }
+  }
+
+  // Fechas de nacimiento y de expedición coherentes entre sí y con el presente.
+  const personas = [
+    { nac: 'studentBirthDate', exp: 'studentDocumentExpeditionDate', quien: 'del estudiante' },
+    { nac: 'cosignerBirthDate', exp: 'cosignerDocumentExpeditionDate', quien: 'del deudor solidario' },
+  ] as const;
+
+  for (const { nac, exp, quien } of personas) {
+    const fNac = parseDate(data[nac]);
+    const fExp = parseDate(data[exp]);
+
+    if (fNac && fNac > hoy) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: [nac],
+        message: `La fecha de nacimiento ${quien} no puede estar en el futuro`,
+      });
+    }
+    if (fExp && fExp > hoy) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: [exp],
+        message: `La fecha de expedición del documento ${quien} no puede estar en el futuro`,
+      });
+    }
+    if (fNac && fExp && fExp < fNac) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: [exp],
+        message: `La expedición del documento ${quien} no puede ser anterior a su nacimiento`,
+      });
+    }
+  }
+
+  // El deudor solidario debe ser mayor de edad para poder respaldar el crédito.
+  const nacDeudor = parseDate(data.cosignerBirthDate);
+  if (nacDeudor && ageInYears(nacDeudor, hoy) < 18) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['cosignerBirthDate'],
+      message: 'El deudor solidario debe ser mayor de edad',
+    });
+  }
+
   // Validar que la cuota inicial sea >= sugerida (siempre entero)
   const suggested = Math.trunc(data.creditPlan === '50/50' ? data.semesterValue * 0.5 : data.semesterValue * 0.2);
   if (data.initialPayment < suggested) {
@@ -133,6 +213,11 @@ export default function NewApplicationPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
+  const [warnings, setWarnings] = useState<ApplicationWarning[]>([]);
+  const [showWarnings, setShowWarnings] = useState(false);
+  const [officialCreditStudyCost, setOfficialCreditStudyCost] = useState<number | null>(null);
+  // Ref y no estado: se lee de forma síncrona dentro de onSubmit.
+  const warningsAcknowledged = useRef(false);
   const [applicationCode, setApplicationCode] = useState('');
   const [draftCode, setDraftCode] = useState('');
   
@@ -321,6 +406,14 @@ export default function NewApplicationPage() {
     return () => subscription.unsubscribe();
   }, [form]);
 
+  // Costo oficial del estudio de crédito del año en curso: sirve para advertir
+  // si el solicitante escribe otro importe (p. ej. el de la cuota inicial).
+  useEffect(() => {
+    getCreditStudyCostByYear(new Date().getFullYear())
+      .then((c) => setOfficialCreditStudyCost(c?.amount ?? null))
+      .catch(() => setOfficialCreditStudyCost(null));
+  }, []);
+
   const handleNext = async () => {
     let fieldsToValidate: (keyof ApplicationFormData)[] = [];
     
@@ -460,6 +553,19 @@ export default function NewApplicationPage() {
   };
 
   const onSubmit = async (data: ApplicationFormData) => {
+    // Antes de enviar, mostrar las advertencias (datos posibles pero
+    // sospechosos) para que el solicitante las revise. No bloquean: si insiste,
+    // se envía igual.
+    if (!warningsAcknowledged.current) {
+      const encontradas = getApplicationWarnings({ ...data, officialCreditStudyCost });
+      if (encontradas.length > 0) {
+        setWarnings(encontradas);
+        setShowWarnings(true);
+        return;
+      }
+    }
+    warningsAcknowledged.current = false;
+
     setIsSubmitting(true);
     
     try {
@@ -601,8 +707,8 @@ export default function NewApplicationPage() {
         <div className="container mx-auto px-4 md:px-6 py-4 md:py-6">
           <div className="flex items-center gap-3">
             <img 
-              src="/images/brand/credinova-logo.svg" 
-              alt="CrediNOVA Logo" 
+              src={LOGO_URL} 
+              alt="CrediNOVA" 
               className="h-12 md:h-16 w-auto"
             />
           </div>
@@ -780,6 +886,46 @@ export default function NewApplicationPage() {
           </Form>
         </div>
       </div>
+      {/* Advertencias previas al envío: datos posibles pero sospechosos */}
+      <AlertDialog open={showWarnings} onOpenChange={setShowWarnings}>
+        <AlertDialogContent className="max-w-[calc(100%-2rem)] md:max-w-lg">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-balance">
+              <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0" />
+              Revise estos datos antes de enviar
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-pretty">
+              Encontramos {warnings.length === 1 ? 'un dato que conviene' : 'algunos datos que conviene'}{' '}
+              verificar. No {warnings.length === 1 ? 'impide' : 'impiden'} enviar la solicitud, pero
+              corregirlo ahora evita demoras en la revisión.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <ul className="max-h-[45vh] space-y-3 overflow-y-auto py-2">
+            {warnings.map((w) => (
+              <li key={`${w.field}-${w.message}`} className="rounded-md border border-amber-300 bg-amber-50 p-3">
+                <p className="text-xs font-semibold text-amber-800">{w.section}</p>
+                <p className="mt-1 text-sm text-amber-900 text-pretty">{w.message}</p>
+              </li>
+            ))}
+          </ul>
+
+          <AlertDialogFooter className="gap-2">
+            <AlertDialogCancel>Volver y corregir</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                warningsAcknowledged.current = true;
+                setShowWarnings(false);
+                // Reenviar: la guarda ya no se activará.
+                form.handleSubmit(onSubmit)();
+              }}
+            >
+              Enviar de todos modos
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Application Confirmation Dialog */}
       <ApplicationConfirmationDialog
         open={showConfirmationDialog}

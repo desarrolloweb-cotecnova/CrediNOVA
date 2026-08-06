@@ -1,23 +1,21 @@
 /**
  * Recursos de marca de CrediNOVA (logos e íconos).
  *
- * Se sirven desde `public/` (independientes de Medo.dev). Al estar centralizados
- * aquí, reemplazar un archivo en `public/images/brand/` actualiza toda la app.
+ * Se sirven desde `public/`. Al estar centralizados aquí, reemplazar un archivo
+ * en `public/images/brand/` actualiza toda la app sin tocar código.
  *
- * NOTA: Los archivos actuales son *placeholders* generados durante la migración
- * (el logo original vivía en el CDN de Medo, inaccesible). Para usar la marca
- * definitiva, reemplaza los archivos en `public/images/brand/` conservando el
- * mismo nombre/ruta y no habrá que tocar el código.
+ * Colores de marca: verde `#015D2C` y naranja `#ED6E1C`.
  */
 
-/** Logo horizontal a color — para fondos claros (login, encabezados, tarjetas). */
+/** Logo horizontal a color — para fondos claros (login, encabezados, documentos). */
 export const LOGO_URL = '/images/brand/credinova-logo.svg';
+
+/**
+ * Logo horizontal en blanco sobre placa verde `#015D2C` — para fondos verdes
+ * (footer del landing). Trae el fondo incrustado, así que sobre el verde de
+ * marca se funde con la superficie.
+ */
+export const LOGO_ON_GREEN_URL = '/images/brand/credinova-logo-verde.svg';
 
 /** Ícono cuadrado a color — para fondos claros (avatares, marcas compactas). */
 export const LOGO_ICON_URL = '/favicon.svg';
-
-/** Ícono en versión clara — para fondos verdes/oscuros (footer del landing). */
-export const LOGO_ICON_LIGHT_URL = '/images/brand/credinova-icon-light.svg';
-
-/** Logo institucional de COTECNOVA — usado en membretes de reportes/documentos. */
-export const COTECNOVA_LOGO_URL = '/images/brand/cotecnova-logo.svg';

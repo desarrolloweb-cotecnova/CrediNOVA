@@ -38,3 +38,6 @@ history/*.json
 /.skills
 /tasks
 package.json.[0-9]*
+
+# Vercel CLI (metadatos locales de deploy)
+.vercel

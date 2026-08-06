@@ -121,6 +121,34 @@ export async function deleteUser(userId: string): Promise<{ success: boolean; er
 }
 
 /**
+ * Restablece la verificación en dos pasos de un usuario (solo admin/rector).
+ *
+ * Borra sus factores TOTP y cierra sus sesiones, de modo que la próxima vez
+ * que inicie sesión deba configurar el segundo factor desde cero. Va por Edge
+ * Function porque desenrolar factores ajenos requiere la service_role key.
+ */
+export async function resetUserMfa(
+  userId: string
+): Promise<{ success: boolean; removedFactors?: number; error: Error | null }> {
+  try {
+    const { data, error } = await supabase.functions.invoke('reset-user-mfa', {
+      body: { userId },
+    });
+
+    if (error) {
+      console.error('Error restableciendo 2FA:', error);
+      const errorMsg = await error?.context?.text();
+      return { success: false, error: new Error(errorMsg || error.message) };
+    }
+
+    return { success: true, removedFactors: data?.removedFactors ?? 0, error: null };
+  } catch (err) {
+    console.error('Error en resetUserMfa:', err);
+    return { success: false, error: err as Error };
+  }
+}
+
+/**
  * Verifica si el usuario actual tiene rol de administrador ('admin' o 'rector')
  */
 export async function isAdministrator(): Promise<boolean> {

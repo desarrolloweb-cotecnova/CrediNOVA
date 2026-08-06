@@ -9,6 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 import { toast } from 'sonner';
+import { LOGO_URL } from '@/lib/assets';
 
 const consultSchema = z.object({
   applicationCode: z.string().min(1, 'Ingrese el código de solicitud'),
@@ -49,8 +50,8 @@ export default function ConsultApplicationPage() {
         <div className="container mx-auto px-4 md:px-6 py-4 md:py-6">
           <div className="flex items-center gap-3">
             <img 
-              src="/images/brand/credinova-logo.svg" 
-              alt="CrediNOVA Logo" 
+              src={LOGO_URL} 
+              alt="CrediNOVA" 
               className="h-12 md:h-16 w-auto"
             />
           </div>

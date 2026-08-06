@@ -9,6 +9,7 @@ import { Loader2, CheckCircle, Clock, AlertCircle, FileText, Download, Mail, Pri
 import { toast } from 'sonner';
 import { getApplicationByCodeAndDocument } from '@/services/applications';
 import type { Application } from '@/types/application';
+import { LOGO_URL } from '@/lib/assets';
 
 const STATUS_CONFIG = {
   en_revision: { label: 'En Revisión', color: 'bg-blue-500', icon: Clock },
@@ -144,8 +145,8 @@ export default function ApplicationViewPage() {
         <header className="border-b border-border bg-background">
           <div className="container mx-auto px-4 md:px-6 py-4 md:py-6">
             <img 
-              src="/images/brand/credinova-logo.svg" 
-              alt="CrediNOVA Logo" 
+              src={LOGO_URL} 
+              alt="CrediNOVA" 
               className="h-12 md:h-16 w-auto"
             />
           </div>
@@ -176,8 +177,8 @@ export default function ApplicationViewPage() {
       <header className="border-b border-border bg-background">
         <div className="container mx-auto px-4 md:px-6 py-4 md:py-6">
           <img 
-            src="/images/brand/credinova-logo.svg" 
-            alt="CrediNOVA Logo" 
+            src={LOGO_URL} 
+            alt="CrediNOVA" 
             className="h-12 md:h-16 w-auto"
           />
         </div>

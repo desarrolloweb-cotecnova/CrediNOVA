@@ -36,6 +36,7 @@ import type { Application, AmortizationRow } from '@/types/application';
 import { EditableField } from '@/components/admin/EditableField';
 
 import { formatDateShort, formatDateTime, formatDateLong } from '@/lib/date';
+import { LOGO_URL } from '@/lib/assets';
 
 const STATUS_LABELS: Record<string, string> = {
   borrador: 'Borrador',
@@ -1761,18 +1762,33 @@ export default function AdminApplicationDetailPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Número de Recibo</p>
-                        <p className="text-base">{application.creditStudyReceiptNumber || 'N/A'}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Fecha de Pago</p>
-                        <p className="text-base">{formatDateShort(application.creditStudyPaymentDate)}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Valor Pagado</p>
-                        <p className="text-base">{application.creditStudyAmount ? formatCurrency(application.creditStudyAmount) : 'N/A'}</p>
-                      </div>
+                      <EditableField
+                        label="Número de Recibo"
+                        displayValue={application.creditStudyReceiptNumber || 'N/A'}
+                        rawValue={application.creditStudyReceiptNumber}
+                        type="text"
+                        onSave={(v) => handleFieldSave('credit_study_receipt_number', v)}
+                        isModified={modifiedFields.has('credit_study_receipt_number')}
+                        disabled={isTerminal}
+                      />
+                      <EditableField
+                        label="Fecha de Pago"
+                        displayValue={formatDateShort(application.creditStudyPaymentDate)}
+                        rawValue={application.creditStudyPaymentDate}
+                        type="date"
+                        onSave={(v) => handleFieldSave('credit_study_payment_date', v)}
+                        isModified={modifiedFields.has('credit_study_payment_date')}
+                        disabled={isTerminal}
+                      />
+                      <EditableField
+                        label="Valor Pagado"
+                        displayValue={application.creditStudyAmount ? formatCurrency(application.creditStudyAmount) : 'N/A'}
+                        rawValue={application.creditStudyAmount}
+                        type="number"
+                        onSave={(v) => handleFieldSave('credit_study_amount', v)}
+                        isModified={modifiedFields.has('credit_study_amount')}
+                        disabled={isTerminal}
+                      />
                     </div>
                     <VerificationPanel
                       id="payment"
@@ -1801,32 +1817,57 @@ export default function AdminApplicationDetailPage() {
                   <CardContent className="space-y-6">
                     {/* Datos del plan */}
                     <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Plan</p>
-                        <p className="text-base font-semibold">{application.creditPlan || 'N/A'}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Valor del Semestre</p>
-                        <p className="text-base font-semibold">{application.semesterValue ? formatCurrency(application.semesterValue) : 'N/A'}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Cuota Inicial</p>
-                        <p className="text-base">{application.initialPayment ? formatCurrency(application.initialPayment) : 'N/A'}</p>
-                      </div>
+                      <EditableField
+                        label="Plan"
+                        displayValue={application.creditPlan || 'N/A'}
+                        rawValue={application.creditPlan}
+                        type="text"
+                        onSave={(v) => handleFieldSave('credit_plan', v)}
+                        isModified={modifiedFields.has('credit_plan')}
+                        disabled={isTerminal}
+                      />
+                      <EditableField
+                        label="Valor del Semestre"
+                        displayValue={application.semesterValue ? formatCurrency(application.semesterValue) : 'N/A'}
+                        rawValue={application.semesterValue}
+                        type="number"
+                        onSave={(v) => handleFieldSave('semester_value', v)}
+                        isModified={modifiedFields.has('semester_value')}
+                        disabled={isTerminal}
+                      />
+                      <EditableField
+                        label="Cuota Inicial"
+                        displayValue={application.initialPayment ? formatCurrency(application.initialPayment) : 'N/A'}
+                        rawValue={application.initialPayment}
+                        type="number"
+                        onSave={(v) => handleFieldSave('initial_payment', v)}
+                        isModified={modifiedFields.has('initial_payment')}
+                        disabled={isTerminal}
+                      />
                       <div>
                         <p className="text-sm font-medium text-muted-foreground">Saldo Financiado</p>
                         <p className="text-base">
                           {financedAmount != null ? formatCurrency(financedAmount) : 'N/A'}
                         </p>
                       </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Número de Cuotas</p>
-                        <p className="text-base">{application.numberOfInstallments ?? 'N/A'}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Día de Pago</p>
-                        <p className="text-base">{application.paymentDayOfMonth ?? 'N/A'}</p>
-                      </div>
+                      <EditableField
+                        label="Número de Cuotas"
+                        displayValue={application.numberOfInstallments != null ? String(application.numberOfInstallments) : 'N/A'}
+                        rawValue={application.numberOfInstallments}
+                        type="number"
+                        onSave={(v) => handleFieldSave('number_of_installments', v)}
+                        isModified={modifiedFields.has('number_of_installments')}
+                        disabled={isTerminal}
+                      />
+                      <EditableField
+                        label="Día de Pago"
+                        displayValue={application.paymentDayOfMonth != null ? String(application.paymentDayOfMonth) : 'N/A'}
+                        rawValue={application.paymentDayOfMonth}
+                        type="number"
+                        onSave={(v) => handleFieldSave('payment_day_of_month', v)}
+                        isModified={modifiedFields.has('payment_day_of_month')}
+                        disabled={isTerminal}
+                      />
                     </div>
 
                     {/* ── Tabla de Amortización inline (obligatoria) ── */}
@@ -1983,18 +2024,33 @@ export default function AdminApplicationDetailPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Número de Recibo</p>
-                        <p className="text-base">{application.initialPaymentReceiptNumber || 'N/A'}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Fecha de Pago</p>
-                        <p className="text-base">{application.initialPaymentDate ? formatDateShort(application.initialPaymentDate) : 'N/A'}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Valor Pagado</p>
-                        <p className="text-base">{application.initialPaymentAmount ? formatCurrency(application.initialPaymentAmount) : 'N/A'}</p>
-                      </div>
+                      <EditableField
+                        label="Número de Recibo"
+                        displayValue={application.initialPaymentReceiptNumber || 'N/A'}
+                        rawValue={application.initialPaymentReceiptNumber}
+                        type="text"
+                        onSave={(v) => handleFieldSave('initial_payment_receipt_number', v)}
+                        isModified={modifiedFields.has('initial_payment_receipt_number')}
+                        disabled={isTerminal}
+                      />
+                      <EditableField
+                        label="Fecha de Pago"
+                        displayValue={application.initialPaymentDate ? formatDateShort(application.initialPaymentDate) : 'N/A'}
+                        rawValue={application.initialPaymentDate}
+                        type="date"
+                        onSave={(v) => handleFieldSave('initial_payment_date', v)}
+                        isModified={modifiedFields.has('initial_payment_date')}
+                        disabled={isTerminal}
+                      />
+                      <EditableField
+                        label="Valor Pagado"
+                        displayValue={application.initialPaymentAmount ? formatCurrency(application.initialPaymentAmount) : 'N/A'}
+                        rawValue={application.initialPaymentAmount}
+                        type="number"
+                        onSave={(v) => handleFieldSave('initial_payment_amount', v)}
+                        isModified={modifiedFields.has('initial_payment_amount')}
+                        disabled={isTerminal}
+                      />
                     </div>
                     <VerificationPanel
                       id="initial_payment"
@@ -2805,8 +2861,8 @@ function MatriculaDocument({ application, generatedAt }: MatriculaDocumentProps)
       {/* Encabezado: logo + datos institución */}
       <div className="flex items-center gap-6 border-b border-border pb-6">
         <img
-          src="/images/brand/cotecnova-logo.svg"
-          alt="Logo Cotecnova"
+          src={LOGO_URL}
+          alt="CrediNOVA"
           className="h-20 w-auto object-contain shrink-0"
         />
         <div className="min-w-0">

@@ -1,6 +1,7 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { MfaGuard } from '@/components/auth/MfaGuard';
+import CuentaPendientePage from '@/pages/CuentaPendientePage';
 
 interface Props {
   children: React.ReactNode;
@@ -14,7 +15,10 @@ interface Props {
  *   2. Perfil en `internal_users` existente y activo.
  *   3. Segundo factor verificado (sesión en AAL2) — vía MfaGuard.
  *
- * Sin sesión → /admin/login. Cuenta inactiva/no provisionada → /admin/login?inactivo=1.
+ * Sin sesión → /admin/login. Cuenta pendiente de aprobación → pantalla
+ * informativa (CuentaPendientePage), conservando la sesión y SIN exigir el
+ * segundo factor: no tiene sentido pedir el 2FA a quien todavía no tiene acceso.
+ * Se configura cuando el administrador activa la cuenta.
  */
 export default function AdminProtectedRoute({ children }: Props) {
   const { user, profile, isActive, loading } = useAuth();
@@ -37,7 +41,7 @@ export default function AdminProtectedRoute({ children }: Props) {
 
   // Perfil inexistente (no provisionado) o inactivo → pendiente de activación.
   if (!profile || !isActive) {
-    return <Navigate to="/admin/login?inactivo=1" state={{ from: location }} replace />;
+    return <CuentaPendientePage />;
   }
 
   return <MfaGuard>{children}</MfaGuard>;

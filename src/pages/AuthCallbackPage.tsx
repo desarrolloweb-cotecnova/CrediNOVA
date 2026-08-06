@@ -23,9 +23,10 @@ export default function AuthCallbackPage() {
       navigate('/admin/login', { replace: true });
       return;
     }
-    // La cuenta existe pero aún no ha sido activada por un admin/rector.
+    // Cuenta aún no aprobada: no exigir 2FA. Entra al panel, que muestra el
+    // aviso de "cuenta pendiente" (AdminProtectedRoute).
     if (profile && !isActive) {
-      navigate('/admin/login?inactivo=1', { replace: true });
+      navigate('/admin/dashboard', { replace: true });
       return;
     }
     let cancelled = false;

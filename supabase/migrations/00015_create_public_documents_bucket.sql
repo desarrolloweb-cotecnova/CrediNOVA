@@ -47,4 +47,7 @@ ON storage.objects FOR DELETE
 TO authenticated
 USING (bucket_id = 'public-documents');
 
-COMMENT ON SCHEMA storage IS 'Bucket public-documents creado para almacenar documentos institucionales públicos como autorizaciones y términos del crédito educativo';
+-- Nota: se eliminó el COMMENT ON SCHEMA storage original — requería ser owner
+-- del esquema storage y fallaba al aplicar la migración con roles estándar.
+-- (Bucket public-documents: documentos institucionales públicos, p. ej. las
+-- autorizaciones del crédito educativo.)

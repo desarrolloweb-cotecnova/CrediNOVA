@@ -82,9 +82,13 @@ contenido de cada archivo de `supabase/migrations/` **en orden numérico**
 
 ### Notas del esquema
 
-- La migración **00004** siembra 3 usuarios internos heredados con contraseña
-  temporal. Con login por Google esos usuarios quedan inertes al **deshabilitar
-  el proveedor Email/Password** (paso 7). No es necesario borrarlos.
+- La migración **00004** sembraba 3 usuarios internos con contraseña temporal.
+  La migración **00034** los elimina: no eran inertes, sino que **rompían el
+  Auth**. Al insertarlos por SQL quedaron con `NULL` en las columnas de token de
+  `auth.users`, y GoTrue las lee como texto no nulo, así que devolvía HTTP 500
+  (`converting NULL to string is unsupported`) al iniciar sesión con Google o al
+  intentar borrarlos desde el panel. Nunca siembres usuarios en `auth.users` por
+  SQL sin poner `''` en esas columnas.
 - La migración **00033** ajusta el trigger para que los nuevos usuarios que entren
   por Google queden **inactivos** hasta que un admin/rector los active.
 - La migración **00029** usa la extensión **`pg_cron`** (keepalive cada 3 días para
@@ -92,8 +96,9 @@ contenido de cada archivo de `supabase/migrations/` **en orden numérico**
   **Database → Extensions** y vuelve a ejecutar esa migración.
 
 Verifica al final que existan las tablas `internal_users`, `applications`,
-`application_documents`, `academic_programs`, `credit_study_costs`, `otps`,
+`academic_programs`, `credit_study_costs`, `otps`,
 `application_verifications` y el historial, y que **RLS** esté activo.
+(`application_documents` no debe existir: la migración 00014 la elimina.)
 
 ---
 
@@ -101,6 +106,10 @@ Verifica al final que existan las tablas `internal_users`, `applications`,
 
 La migración **00015** crea el bucket **`public-documents`** (público) con sus
 políticas. Verifica en **Storage** que exista. Si no, ejecútala manualmente.
+
+Sube además al bucket el PDF **`autorizaciones-credito-educativo.pdf`**
+(Sección F del formulario lo enlaza desde `public-documents`; descárgalo del
+proyecto anterior o usa el original que tenga la institución).
 
 > Los documentos que suben los solicitantes usan **Cloudinary** (preset sin firma
 > `credinova_unsigned`, cuenta `drqfuh66o`), que se reutiliza sin cambios.
@@ -197,10 +206,11 @@ En **Authentication** del panel de Supabase:
 ## 9. Crear el primer administrador (bootstrap)
 
 El trigger deja inactivos a los nuevos usuarios, salvo el **primer** usuario del
-sistema, que se crea como **admin activo**. Por eso:
+sistema (cuando `internal_users` está vacía) y el correo de arranque
+`desarrolloweb@cotecnova.edu.co`, que se crean como **admin activo**. Por eso:
 
 1. Con todo desplegado, entra a `/admin/login` y haz **"Iniciar sesión con Google"**
-   con la cuenta que será administradora (p. ej. `rector@cotecnova.edu.co`).
+   con la cuenta de arranque `desarrolloweb@cotecnova.edu.co`.
 2. Al ser el primer registro, quedará como **admin activo**. Se te pedirá
    **configurar el 2FA** (escanear el QR con Google Authenticator) y luego entrarás
    al panel.
@@ -255,8 +265,11 @@ Cuando tengas los Excel exportados desde Medo:
 - El archivo `.env` **nunca** se sube (está en `.gitignore`). En Vercel las
   variables viven en el panel.
 - La `service_role` key solo se usa en el servidor/CLI; jamás en el frontend.
-- Los logos actuales en `public/images/brand/` son **placeholders** (el logo
-  original estaba en el CDN de Medo, inaccesible). Reemplaza esos archivos por la
-  marca definitiva conservando el mismo nombre y no habrá que tocar código.
+- Los logos definitivos ya están en `public/images/brand/` (`credinova-logo.svg`
+  para fondos claros, `credinova-logo-verde.svg` para fondos verdes) y en
+  `public/favicon.svg`. Las rutas están centralizadas en `src/lib/assets.ts`:
+  reemplazar un archivo conservando su nombre actualiza toda la app sin tocar
+  código. Al cambiar el favicon, sube la versión en `package.json` para que los
+  navegadores no lo sirvan desde caché.
 - Recuerda migrar a futuro Cloudinary/ZapSign/Brevo a cuentas propias de COTECNOVA
   cuando se decida (hoy se reutilizan).
