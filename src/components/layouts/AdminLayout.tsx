@@ -25,6 +25,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { SessionExpiryNotice } from '@/components/common/SessionExpiryNotice';
 import { getCurrentUserSync, logout } from '@/services/auth';
 import { supabase } from '@/lib/supabase';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -395,6 +396,8 @@ function ProfileDropdown({ currentUser, onOpenProfile, onLogout, compact = false
             )}
           </div>
         </div>
+
+        <SessionExpiryNotice className="px-4 pb-3" />
 
         {/* Acciones */}
         <div className="py-1">
