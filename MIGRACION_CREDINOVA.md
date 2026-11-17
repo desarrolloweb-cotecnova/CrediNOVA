@@ -78,7 +78,7 @@ supabase db push
 
 Si prefieres no usar el CLI, abre **SQL Editor** en el panel y ejecuta el
 contenido de cada archivo de `supabase/migrations/` **en orden numérico**
-(`00001…` → `00033…`). No te saltes ninguno: hay dependencias entre ellos.
+(`00001…` → `00034…`). No te saltes ninguno: hay dependencias entre ellos.
 
 ### Notas del esquema
 
