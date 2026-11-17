@@ -87,9 +87,24 @@ contenido de cada archivo de `supabase/migrations/` **en orden numérico**
   el proveedor Email/Password** (paso 7). No es necesario borrarlos.
 - La migración **00033** ajusta el trigger para que los nuevos usuarios que entren
   por Google queden **inactivos** hasta que un admin/rector los active.
-- La migración **00029** usa la extensión **`pg_cron`** (keepalive cada 3 días para
-  que el proyecto no se pause). Si `pg_cron` no está disponible, habilítala en
-  **Database → Extensions** y vuelve a ejecutar esa migración.
+- La migración **00029** crea un job de **`pg_cron`**, pero **eso solo NO evita
+  que el proyecto se pause**: Supabase mide la actividad por peticiones externas
+  (API/conexiones), y un job interno deja de correr en cuanto el proyecto se pausa.
+  El keepalive real es externo (ver **Keepalive** más abajo): Vercel Cron llama a
+  `/api/keepalive` a diario y un workflow de GitHub Actions lo respalda cada 2 días.
+
+### Keepalive (evitar que Supabase pause el proyecto)
+
+1. **Vercel Cron (principal):** `vercel.json` programa `GET /api/keepalive` todos
+   los días. Usa `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` (ya configuradas en
+   Vercel; asegúrate de que estén en el entorno *Production*). Opcional: define
+   `CRON_SECRET` en Vercel para que solo Vercel Cron pueda invocarla. Se verifica en
+   Vercel → proyecto → **Settings → Cron Jobs** (y sus logs).
+2. **GitHub Actions (respaldo):** `.github/workflows/supabase-keepalive.yml`. Crea
+   los secrets `SUPABASE_URL` y `SUPABASE_ANON_KEY` en GitHub → Settings → Secrets
+   and variables → Actions, y ejecútalo una vez a mano (*Run workflow*) para probar.
+   Nota: GitHub desactiva los workflows programados tras 60 días sin commits en
+   repos públicos; por eso Vercel es el principal.
 
 Verifica al final que existan las tablas `internal_users`, `applications`,
 `application_documents`, `academic_programs`, `credit_study_costs`, `otps`,

@@ -1,3 +1,8 @@
+-- NOTA: este job interno NO evita por sí solo la pausa del plan Free de Supabase
+-- (la pausa se decide por actividad externa y pg_cron no corre con el proyecto
+-- pausado). El keepalive efectivo es externo: api/keepalive.js (Vercel Cron) y
+-- .github/workflows/supabase-keepalive.yml. Se conserva como complemento.
+
 -- Habilitar extensión pg_cron (necesaria para tareas programadas)
 CREATE EXTENSION IF NOT EXISTS pg_cron;
 
